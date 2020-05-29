@@ -121,29 +121,33 @@ function meowWord(word) {
 	local len = strlen(word)
 
 	if (len == 1) {
-		return meowCase("m", word)
+		return meowCase(randomfrom("m", "p"), word)
 	} else
 	if (len == 2) {
-		return meowCase("mi", word)
+		return meowCase(randomfrom("aw", "me", "mi"), word)
 	} else
 	if (len == 3) {
-		return meowCase("mew", word)
+		return meowCase(randomfrom("mew", "row", "prr"), word)
 	} else
 	if (len == 4) {
-		return meowCase("meow", word)
+		return meowCase(randomfrom("meow", "meep", "mnaw", "purr"), word)
 	}
 
 	local min = 1
 	local max = len - 2 // max is length minus m and w
 	local num_e = random(min, max)
 	local num_o = max - num_e
-	//print(word, len, num_e, num_o)
-	return meowCase("m" + multiplyLetter("e", num_e) + multiplyLetter("o", num_o) + "w", word)
+	local large_meow = randomfrom(
+		"m" + multiplyLetter("e", num_e) + multiplyLetter("o", num_o) + "w", // meow
+		"m" + multiplyLetter("e", num_e) + multiplyLetter("w", num_o) + "p", // mewp
+		"mr" + multiplyLetter("o", num_e) + multiplyLetter("w", num_o) // mrow
+	)
+
+	return meowCase(large_meow, word)
 }
 
 // Mew meow mew mew.
 function meowTR(text) {
-	//print(text)
 	local meowlated = []
 
 	local re = regexcompile("([a-zA-Z0-9]+|[^a-zA-Z0-9])")
