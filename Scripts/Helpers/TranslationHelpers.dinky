@@ -78,6 +78,90 @@ function useTranslation(language) {
 	return translation_table ? YES : NO
 }
 
+function multiplyLetter(letter, multiple) {
+	local letters = []
+	for (local i=0; i<multiple; i++) {
+		arrayappend(letters, letter)
+	}
+	return strjoin(letters, "")
+}
+
+function isWord(text) {
+	local re = regexcompile("([a-zA-Z0-9]+)")
+	return regexmatch(re, text)
+}
+
+function meowCase(word, orig) {
+	local len = strlen(word)
+	local re_lower = regexcompile("([a-z0-9]+)")
+	local re_upper = regexcompile("([A-Z0-9]+)")
+
+	// most words are lowercase
+	if (regexmatch(re_lower, orig) && strlen(regexcapture(re_lower, orig)[0]) == len) {
+		return word
+	} else
+	// shouting
+	if (regexmatch(re_upper, orig) && strlen(regexcapture(re_upper, orig)[0]) == len) {
+		return strupper(word)
+	}
+
+	local meowcased = []
+	for(local i=0; i<len; i++) {
+		if (regexmatch(re_upper, strslice(orig, i, i))) {
+			arrayappend(meowcased, strupper(strslice(word, i, i)))
+		} else {
+			arrayappend(meowcased, strslice(word, i, i))
+		}
+	}
+
+	return strjoin(meowcased, "")
+}
+
+function meowWord(word) {
+	local len = strlen(word)
+
+	if (len == 1) {
+		return meowCase("m", word)
+	} else
+	if (len == 2) {
+		return meowCase("mi", word)
+	} else
+	if (len == 3) {
+		return meowCase("mew", word)
+	} else
+	if (len == 4) {
+		return meowCase("meow", word)
+	}
+
+	local min = 1
+	local max = len - 2 // max is length minus m and w
+	local num_e = random(min, max)
+	local num_o = max - num_e
+	//print(word, len, num_e, num_o)
+	return meowCase("m" + multiplyLetter("e", num_e) + multiplyLetter("o", num_o) + "w", word)
+}
+
+// Mew meow mew mew.
+function meowTR(text) {
+	//print(text)
+	local meowlated = []
+
+	local re = regexcompile("([a-zA-Z0-9]+|[^a-zA-Z0-9])")
+	local a = regexcaptureall(re, text)
+	if (a) {
+		foreach(local match in a) {
+			//print(match)
+			if(isWord(match)) {
+				arrayappend(meowlated, meowWord(match))
+			} else {
+				arrayappend(meowlated, match)
+			}
+		}
+	}
+
+	return strjoin(meowlated, "")
+}
+
 /*{{ ------------------------------------------------------------------------------------
 @func TR(text)
 @desc Translates a raw line of text
@@ -104,7 +188,9 @@ function TR(text) {
 	if (text?[5] == ':') {							// TEXT(11881,"...")
 		if (translation_table == null) {
 			if (DEBUG(translation_markers)) return "??"+text+"??"
-			return strslice(text, 6)
+			local meow_text = meowTR(strslice(text, 6))
+			//print(meow_text)
+			return meow_text
 		}
 		local id = strslice(text, 0, 4)
 		local tr_text = translation_table?[id]?.text
